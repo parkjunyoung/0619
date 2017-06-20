@@ -35,6 +35,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // SERVE STATIC FILES - REACT PROJECT
 app.use('/', express.static( path.join(__dirname, '../public') ));
 
+//업로드 path 추가
+app.use('/uploads', express.static( path.join(__dirname, '../uploads') ));
+
 app.use('/api/admin', admin);
 
 app.get('*', function(req,res){

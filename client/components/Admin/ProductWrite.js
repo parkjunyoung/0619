@@ -1,11 +1,14 @@
 import React, { Component } from 'react';
 import axios from 'axios';
+import MyInput from './MyInput';
 
 class ProductWrite extends Component {
 
     constructor(){
         super();
         this.state = {
+            method : "post",
+            action : "/api/admin/products/write",
             product_name : "",
             price : "",
             sale_price : "",
@@ -13,8 +16,12 @@ class ProductWrite extends Component {
         };
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.handleFile = this.handleFile.bind(this);
     }
 
+    handleFile(event){
+        this.setState({thumbnail:event.target.files[0]})
+    }
 
     handleChange(event){
         let result = {};
@@ -30,10 +37,12 @@ class ProductWrite extends Component {
             axios.get(`/api/admin/products/${productId}`, {
             }).then( (res) => {
                 this.setState({
-                    product_name : res.data.product_name,
-                    price : res.data.price,
-                    sale_price : res.data.sale_price,
-                    description : res.data.description
+                    method : "put", 
+                    action : `/api/admin/products/${productId}`,
+                    product_name : res.data.product.product_name,
+                    price : res.data.product.price,
+                    sale_price : res.data.product.sale_price,
+                    description : res.data.product.description
                 });
             }).catch( (error) => {
                 console.log(error);
@@ -54,11 +63,24 @@ class ProductWrite extends Component {
             return;
         }
 
-        axios.post('/api/admin/products/write', {
-            product_name : this.state.product_name,
-            price : this.state.price,
-            sale_price : this.state.sale_price,
-            description : this.state.description
+        const formData = new FormData();
+        formData.append('product_name', this.state.product_name);
+        formData.append('thumbnail', this.state.thumbnail);
+        formData.append('price', this.state.price);
+        formData.append('sale_price', this.state.sale_price);
+        formData.append('description', this.state.description);
+
+        const config = {
+            headers: {
+                'content-type': 'multipart/form-data'
+            }
+        };
+
+        axios({
+            method : this.state.method,
+            url : this.state.action,
+            data : formData,
+            config : config
         }).then( (res) => {
             if(res.data.message==="success"){
                 alert('작성되었습니다.');
@@ -81,31 +103,31 @@ class ProductWrite extends Component {
                             <tr>
                                 <th>제품명</th>
                                 <td>
-                                    <input type="text" className="form-control" name="product_name" ref="product_nameRef" value={this.state.product_name || ''} onChange={this.handleChange} />
+                                    <input type="text" className="form-control" name="product_name" ref="product_nameRef" value={this.state.product_name} onChange={this.handleChange} />
                                 </td>
                             </tr>
                             <tr>
                                 <th>제품이미지</th>
                                 <td>
-                                    <input type="file" />
+                                    <input type="file" name="thumbnail" onChange={this.handleFile}/>
                                 </td>
                             </tr>
                             <tr>
                                 <th>가격</th>
                                 <td>
-                                    <input type="text" className="form-control" style={{ width : "15%" }}  name="price"  value={this.state.price || ''} onChange={this.handleChange}/>
+                                    <input type="text" className="form-control" style={{ width : "15%" }}  name="price"  value={this.state.price} onChange={this.handleChange}/>
                                 </td>
                             </tr>
                             <tr>
                                 <th>할인가</th>
                                 <td>
-                                    <input type="text" className="form-control" style={{ width : "15%" }} name="sale_price"  value={this.state.sale_price || ''} onChange={this.handleChange}/>
+                                    <input type="text" className="form-control" style={{ width : "15%" }} name="sale_price"  value={this.state.sale_price} onChange={this.handleChange}/>
                                 </td>
                             </tr>
                             <tr>
                                 <th>설명</th>
                                 <td>
-                                    <textarea className="form-control" name="description" onChange={this.handleChange} defaultValue={this.state.description || ''}></textarea>
+                                    <textarea className="form-control" name="description" onChange={this.handleChange} defaultValue={this.state.description}></textarea>
                                 </td>
                             </tr>
                         </tbody>

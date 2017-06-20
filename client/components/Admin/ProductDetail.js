@@ -40,6 +40,11 @@ class ProductDetail extends Component {
                             { createdAt.month } -
                             { createdAt.day }
                         </div>
+                        <div>
+                            {this.state.product.thumbnail ? 
+                                <img src={`/uploads/${this.state.product.thumbnail}`} /> : ''
+                            }
+                        </div>
                         { this.state.product.description }
                     </div>
                 </div>
